@@ -91,7 +91,7 @@
 
   }
 
-  img.onload = () => typeCommand("neofetch", () => {
+  img.onload = () => typeCommand("fastfetch", () => {
     draw();
     drawError();
   });
@@ -197,3 +197,4 @@
 
 })();
 console.log("helloworld?");
+
