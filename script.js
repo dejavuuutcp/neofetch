@@ -1,5 +1,5 @@
 (() => {
-  "use strict"; // 1
+  "use strict";
 
   const canvas = document.getElementById("c");
   const ctx = canvas.getContext("2d");
@@ -7,29 +7,30 @@
   const icons = ["1.ico", "2.ico", "3.ico"];
 
   const info = [
-    "User:               dejavu@crunchbang",
+    "User:               dejavu@nixos",
     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-    "Operating System:   CrunchBang 11 Waldorf (Debian-based i686)",
-    "Installed Packages: 1874",
+    "Operating System:   NixOS 24.11 Vicuña (x86_64)",
+    "Installed Packages: 127 (system), 83 (user profile)",
     "Screen Resolution:  800x600",
-    "Kernel Version:     6.9.7",
-    "Processes:          17 (0 user, 1 undefined)",
-    "RAM Usage:          128MiB / 512MiB",
-    "GMod dir:           /home/deja/.steam/steam/steamapps/common/GarrysMod",
-    "Uptime:             3 days, 4 hours",
+    "Kernel Version:     6.6.54",
+    "Processes:          87",
+    "RAM Usage:          896MiB / 1024MiB",
+    "GMod dir:           /home/dejavu/.steam/steam/steamapps/common/GarrysMod",
+    "Config:             /etc/nixos/configuration.nix",
+    "Uptime:             2 days, 16 hours",
     "Shell:              bash 5.2",
-    "MOTD:               Uptime lies. You died long ago.",
     "IPv4:               203.0.113.42",
-    "CPU:                Intel Atom N270 @ 1.6GHz",
-    "GPU:                Intel GMA 950"
+    "CPU:                Intel Core 2 Duo E4300 @ 1.8GHz",
+    "GPU:                Intel GMA 3100"
   ];
 
   let cmd = null;
   let lastDraw = 0;
+  let animationFrame = null;
 
   const resizeCanvas = () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   };
   resizeCanvas();
 
@@ -40,8 +41,8 @@
     ctx.fillText("enjoy!", 40, canvas.height - 350);
   };
 
-  function typeCommand(text, cb) {
-    const prefix = "dejavu@crunchbang:~$ ";
+  function typeCommand(text, callback) {
+    const prefix = "dejavu@nixos:~$ ";
     let idx = 0;
     let blink = true;
 
@@ -57,7 +58,7 @@
       if (idx++ > text.length) {
         clearInterval(interval);
         cmd = prefix + text;
-        cb?.();
+        callback?.();
       }
     }, 150);
   }
@@ -70,7 +71,9 @@
     if (now - lastDraw < 16) return;
     lastDraw = now;
 
-    const x = 40, y = 65, size = 500;
+    const x = 40;
+    const y = 65;
+    const size = 500;
 
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -87,24 +90,28 @@
 
     ctx.fillStyle = "#fff";
     ctx.font = "18px 'Courier New', monospace";
-    info.forEach((line, i) => ctx.fillText(line, x + size + 30, y + i * 22));
-
+    info.forEach((line, i) => {
+      ctx.fillText(line, x + size + 30, y + i * 22);
+    });
   }
 
-  img.onload = () => typeCommand("fastfetch", () => {
-    draw();
-    drawError();
-  });
+  img.onload = () => {
+    typeCommand("fastfetch", () => {
+      draw();
+      drawError();
+    });
+  };
 
   let iconIdx = 0;
   setInterval(() => {
-    if (!favicon) return;
-    favicon.href = icons[iconIdx];
-    iconIdx = (iconIdx + 1) % icons.length;
+    if (favicon) {
+      favicon.href = icons[iconIdx];
+      iconIdx = (iconIdx + 1) % icons.length;
+    }
   }, 1000);
 
   let resizeTimeout;
-  addEventListener("resize", () => {
+  window.addEventListener("resize", () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       resizeCanvas();
@@ -119,8 +126,7 @@
       this.vol = document.getElementById("vol");
       this.pct = document.getElementById("pct");
 
-      if (!this.audio) return;
-      this.init();
+      if (this.audio) this.init();
     }
 
     init() {
@@ -129,27 +135,23 @@
 
       this.btn?.addEventListener("click", () => this.toggle());
       this.vol?.addEventListener("input", () => this.changeVolume());
+      
       this.audio.addEventListener("ended", () => this.updateBtn());
       this.audio.addEventListener("play", () => this.updateBtn());
       this.audio.addEventListener("pause", () => this.updateBtn());
-
-      this.audio.addEventListener("error", () => {
-        if (this.btn) {
-          this.btn.disabled = true;
-          this.btn.textContent = "holyshit111";
-        }
-      });
+      this.audio.addEventListener("error", () => this.handleError());
 
       this.audio.play().catch(() => {
-        document.body.addEventListener("click", () => {
-          this.audio.play();
-        }, { once: true });
+        document.body.addEventListener("click", () => this.audio.play(), { once: true });
       });
     }
 
     toggle() {
-      if (this.audio.paused) this.audio.play().catch(() => {});
-      else this.audio.pause();
+      if (this.audio.paused) {
+        this.audio.play().catch(console.error);
+      } else {
+        this.audio.pause();
+      }
     }
 
     changeVolume() {
@@ -158,25 +160,36 @@
     }
 
     updateBtn() {
-      if (this.btn) this.btn.textContent = this.audio.paused ? "Play" : "Pause";
+      if (this.btn) {
+        this.btn.textContent = this.audio.paused ? "Play" : "Pause";
+      }
     }
 
     updateUI() {
-      if (this.pct) this.pct.textContent = Math.round(this.audio.volume * 100) + "%";
+      if (this.pct) {
+        this.pct.textContent = `${Math.round(this.audio.volume * 100)}%`;
+      }
     }
 
     adjust(delta) {
-      const vol = Math.max(0, Math.min(1, this.audio.volume + delta));
-      this.audio.volume = vol;
-      if (this.vol) this.vol.value = vol;
+      const newVol = Math.max(0, Math.min(1, this.audio.volume + delta));
+      this.audio.volume = newVol;
+      if (this.vol) this.vol.value = newVol;
       this.updateUI();
+    }
+
+    handleError() {
+      if (this.btn) {
+        this.btn.disabled = true;
+        this.btn.textContent = "Error";
+      }
     }
   }
 
   const player = new MusicPlayer();
 
   let lastKey = 0;
-  document.addEventListener("keydown", e => {
+  document.addEventListener("keydown", (e) => {
     const now = performance.now();
     if (now - lastKey < 50) return;
     lastKey = now;
@@ -187,14 +200,15 @@
         player?.toggle();
         break;
       case "ArrowUp":
+        e.preventDefault();
         player?.adjust(0.05);
         break;
       case "ArrowDown":
+        e.preventDefault();
         player?.adjust(-0.05);
         break;
     }
   });
 
+  console.log("Hello World");
 })();
-console.log("helloworld?");
-
