@@ -93,12 +93,12 @@
     info.forEach((line, i) => {
       ctx.fillText(line, x + size + 30, y + i * 22);
     });
+    drawError();
   }
 
   img.onload = () => {
     typeCommand("fastfetch", () => {
       draw();
-      drawError();
     });
   };
 
@@ -212,3 +212,4 @@
 
   console.log("Hello World");
 })();
+
