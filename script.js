@@ -19,7 +19,7 @@
     "Config:             /etc/nixos/configuration.nix",
     "Uptime:             2 days, 16 hours",
     "Shell:              bash 5.2",
-    "IPv4:               203.0.113.42",
+    "IPv4:               104.28.13.67",
     "CPU:                Intel Core 2 Duo E4300 @ 1.8GHz",
     "GPU:                Intel GMA 3100"
   ];
@@ -212,4 +212,5 @@
 
   console.log("Hello World");
 })();
+
 
