@@ -7,21 +7,24 @@
   const icons = ["1.ico", "2.ico", "3.ico"];
 
   const info = [
-    "User:               dejavu@nixos",
+    "dejavu@nixos",
     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-    "Operating System:   NixOS 24.11 Vicuña (x86_64)",
-    "Installed Packages: 127 (system), 83 (user profile)",
-    "Screen Resolution:  800x600",
-    "Kernel Version:     6.6.54",
-    "Processes:          87",
-    "RAM Usage:          896MiB / 1024MiB",
-    "GMod dir:           /home/dejavu/.steam/steam/steamapps/common/GarrysMod",
-    "Config:             /etc/nixos/configuration.nix",
-    "Uptime:             2 days, 16 hours",
-    "Shell:              bash 5.2",
-    "IPv4:               104.28.13.67",
-    "CPU:                Intel Core 2 Duo E4300 @ 1.8GHz",
-    "GPU:                Intel GMA 3100"
+    "OS:        NixOS 24.11.20241211.7e8f6f9 (Vicuña) x86_64",
+    "Host:      Desktop",
+    "Kernel:    6.6.54",
+    "Uptime:    2 days, 16 hours, 34 mins",
+    "Packages:  210 (nix-system), 145 (nix-user)",
+    "Shell:     bash 5.2.26",
+    "Res:       1280x1024",
+    "DE:        None",
+    "WM:        dwm",
+    "Theme:     Arc-Dark [GTK2/3]",
+    "Icons:     Papirus-Dark [GTK2/3]",
+    "Terminal:  st",
+    "CPU:       Intel Core 2 Quad Q6600 (4) @ 2.400GHz",
+    "GPU:       NVIDIA GeForce 8600 GT",
+    "Memory:    1547MiB / 4096MiB",
+    "Disk (/):  87.42GiB / 119.24GiB (73%)"
   ];
 
   let cmd = null;
@@ -33,13 +36,6 @@
     canvas.height = window.innerHeight;
   };
   resizeCanvas();
-
-  const drawError = () => {
-    ctx.fillStyle = "#f00";
-    ctx.font = "18px 'Courier New', monospace";
-    ctx.fillText("kernel panic - not syncing: Attempted to kill init!", 40, canvas.height - 370);
-    ctx.fillText("enjoy!", 40, canvas.height - 350);
-  };
 
   function typeCommand(text, callback) {
     const prefix = "dejavu@nixos:~$ ";
@@ -93,7 +89,12 @@
     info.forEach((line, i) => {
       ctx.fillText(line, x + size + 30, y + i * 22);
     });
-    drawError();
+    
+    const errorY = y + info.length * 22 + 155;
+    ctx.fillStyle = "#f00";
+    ctx.font = "18px 'Courier New', monospace";
+    ctx.fillText("kernel panic - not syncing: Attempted to kill init!", x, errorY);
+    ctx.fillText("have a fun", x, errorY + 25);
   }
 
   img.onload = () => {
@@ -212,5 +213,3 @@
 
   console.log("Hello World");
 })();
-
-
